@@ -165,7 +165,10 @@ services:
   #
   faf-unrealircd:
     container_name: faf-unrealircd
-    build: git://github.com/FAForever/docker-unrealircd#feature/docker-improvements
+    build:
+      context: git://github.com/FAForever/docker-unrealircd#feature/docker-improvements
+      args:
+        unreal_version: '4.0.1'
     ulimits:
       nofile:
         soft: 8192
@@ -175,14 +178,11 @@ services:
         aliases:
           - "faf-irc"
           - "irc.faforever.com"
-          - "services.faforever.com"
-    depends_on:
-      faf-db:
-        condition: service_healthy
     volumes:
       - ./config/faf-unrealircd/ssl:/home/unreal/unrealircd/conf/ssl
-      - ./config/faf-unrealircd/services.conf:/home/unreal/unrealircd/services/conf/services.conf
       - ./config/faf-unrealircd/unrealircd.conf:/home/unreal/unrealircd/conf/unrealircd.conf
+      - ./config/faf-unrealircd/ircd.motd:/home/unreal/unrealircd/conf/ircd.motd
+      - ./config/faf-unrealircd/ircd.rules:/home/unreal/unrealircd/conf/ircd.rules
     restart: always
     ports:
       - "6667:6667"
@@ -192,6 +192,27 @@ services:
       - "8067:8067"
       - "7070:7070"
       - "8167:8167"
+
+  #
+  # FAF anope services for irc
+  #
+  faf-anope:
+    container_name: faf-anope
+    build:
+      context: ./docker-anope
+      args:
+        anope_version: '2.0.3'
+    networks:
+      faf:
+        aliases:
+          - "services.faforever.com"
+    volumes:
+      - ./config/faf-anope/services.conf:/home/unreal/unrealircd/services/conf/services.conf
+    depends_on:
+      faf-db:
+        condition: service_healthy
+      faf-unrealircd
+    restart: always
 
   #
   # FAF Mumble server.
