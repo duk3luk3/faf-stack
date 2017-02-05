@@ -9,13 +9,23 @@ There are two directories: `config` (already there) and `data` (created upon fir
 
 ### Configuration
 
-Each service has its own directory within `conf`. They usually contain an environment file and/or other configuration
-files needed for the service to operate properly. Environment files are loaded by Docker Compose and additional
-files/directories may be mounted as volumes (both as specified in `docker-compose.yml`).
+Each service has its own directory within `conf`. They contain an configuration
+files needed for the service to operate properly. These files are all mounted as volumes
+(as specified in `docker-compose.yml`).
+
+**Keep secrets out of config files**. To let you develop, debug and share your config without worrying about leaking secrets (like passwords and keys), config files should not contain secrets. Read the next section for how to handle secrets.
 
 For production or personal use, we recommend to create a new branch in which configuration files can be committed
 safely. Once the stack gets updated, changes can be merged into this branch as needed. However, **do never push
 production or your personal configuration files**.
+
+### Secrets
+
+All secrets are stored in environment files, and environment files are never committed to git.
+
+The repository contains a `secrets.tpl` directory. Copy this directory using `cp -r secrets.tpl secrets`.
+
+If secrets have to be added to config files, this is accomplished by config files containing placeholders of the secrets that are copied from the environment variables into the config file before starting the service.
 
 ### Data
 

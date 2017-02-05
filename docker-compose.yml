@@ -12,7 +12,7 @@ services:
         aliases:
           - "faf-db"
     restart: always
-    env_file: ./config/faf-db/faf-db.env
+    env_file: ./secrets/faf-db.env
     ports:
       - "127.0.0.1:3306:3306"
     volumes:
@@ -29,7 +29,7 @@ services:
         aliases:
           - "faf-server"
     restart: always
-    env_file: ./config/faf-server/faf-server.env
+    env_file: ./secrets/faf-server.env
     expose:
       - "8080" # HTTP Management API
     ports:
@@ -55,7 +55,7 @@ services:
         aliases:
           - "faf-api"
     restart: always
-    env_file: ./config/faf-api/faf-api.env
+    env_file: ./secrets/faf-api.env
     volumes:
       - ./data/content:/content
     expose:
@@ -79,7 +79,7 @@ services:
     container_name: faf-website
     build: git://github.com/FAForever/website.git
     restart: always
-    env_file: ./config/faf-website/faf-website.env
+    env_file: ./secrets/faf-website.env
     networks:
       - faf
     depends_on:
@@ -178,9 +178,12 @@ services:
         aliases:
           - "faf-irc"
           - "irc.faforever.com"
+    env_file:
+      -  ./secrets/faf-unrealircd.env
+      -  ./secrets/faf-irc-service.env
     volumes:
       - ./config/faf-unrealircd/ssl:/home/unreal/unrealircd/conf/ssl
-      - ./config/faf-unrealircd/unrealircd.conf:/home/unreal/unrealircd/conf/unrealircd.conf
+      - ./config/faf-unrealircd/unrealircd.conf:/home/unreal/unrealircd/conf/unrealircd.conf.tpl
       - ./config/faf-unrealircd/ircd.motd:/home/unreal/unrealircd/conf/ircd.motd
       - ./config/faf-unrealircd/ircd.rules:/home/unreal/unrealircd/conf/ircd.rules
     restart: always
@@ -206,12 +209,14 @@ services:
       faf:
         aliases:
           - "services.faforever.com"
+    env_file:
+      -  ./secrets/faf-anope.env
+      -  ./secrets/faf-irc-service.env
     volumes:
-      - ./config/faf-anope/services.conf:/home/unreal/unrealircd/services/conf/services.conf
+      - ./config/faf-anope/services.conf:/home/unreal/unrealircd/services/conf/services.conf.tpl
     depends_on:
       faf-db:
         condition: service_healthy
-      faf-unrealircd
     restart: always
 
   #
@@ -226,7 +231,7 @@ services:
       faf-db:
         condition: service_healthy
     restart: always
-    env_file: ./config/faf-murmur/faf-murmur.env
+    env_file: ./secrets/faf-murmur.env
     ports:
       - "64738:64738"
       - "64738/udp:64738/udp"
@@ -240,7 +245,7 @@ services:
     restart: always
     volumes:
       - ./data/content/app:/usr/share/nginx/html
-    env_file: ./config/faf-legacy-apps/faf-legacy-apps.env
+    env_file: ./secrets/faf-legacy-apps.env
     ports:
       - "127.0.0.1:8094:80"
 
@@ -261,7 +266,7 @@ services:
     depends_on:
       faf-db:
         condition: service_healthy
-    env_file: ./config/faf-wordpress/faf-wordpress.env
+    env_file: ./secrets/faf-wordpress.env
     ports:
       - "127.0.0.1:8095:80"
 
@@ -279,7 +284,7 @@ services:
       faf-db:
         condition: service_healthy
     restart: always
-    env_file: ./config/faf-clans/faf-clans.env
+    env_file: ./secrets/faf-clans.env
     ports:
       - "127.0.0.1:8096:80"
 
@@ -295,7 +300,7 @@ services:
       faf-db:
         condition: service_healthy
     restart: always
-    env_file: ./config/faf-softvote/faf-softvote.env
+    env_file: ./secrets/faf-softvote.env
     ports:
       - "127.0.0.1:8097:80"
 
@@ -315,7 +320,7 @@ services:
       faf-db:
         condition: service_healthy
     restart: always
-    env_file: ./config/faf-forums/faf-forums.env
+    env_file: ./secrets/faf-forums.env
     ports:
       - "127.0.0.1:8098:80"
 
@@ -333,7 +338,7 @@ services:
       faf-db:
         condition: service_healthy
     restart: always
-    env_file: ./config/faf-content/faf-content.env
+    env_file: ./secrets/faf-content.env
     ports:
       - "127.0.0.1:8091:80"
 
@@ -346,7 +351,7 @@ services:
     restart: always
     volumes:
       - ./data/faf-wiki:/usr/share/nginx/html
-    env_file: ./config/faf-wiki/faf-wiki.env
+    env_file: ./secrets/faf-wiki.env
     ports:
       - "127.0.0.1:8092:80"
 
@@ -365,7 +370,7 @@ services:
       faf-db:
         condition: service_healthy
     restart: always
-    env_file: ./config/faf-legacy-updater/faf-legacy-updater.env
+    env_file: ./secrets/faf-legacy-updater.env
     ports:
       - "9001:9001"
 
@@ -384,7 +389,7 @@ services:
       faf-db:
         condition: service_healthy
     restart: always
-    env_file: ./config/faf-legacy-live-replay-server/faf-legacy-live-replay-server.env
+    env_file: ./secrets/faf-legacy-live-replay-server.env
     ports:
       - "15000:15000"
 
@@ -403,7 +408,7 @@ services:
       faf-db:
         condition: service_healthy
     restart: always
-    env_file: ./config/faf-legacy-secondary-server/faf-legacy-secondary-server.env
+    env_file: ./secrets/faf-legacy-secondary-server.env
     ports:
       - "11002:11002"
 
@@ -413,7 +418,7 @@ services:
   faf-slack-invite-automation:
     container_name: slack-invite-automation
     build: https://github.com/outsideris/slack-invite-automation.git
-    env_file: ./config/faf-slack-invite-automation/faf-slack-invite-automation.env
+    env_file: ./secrets/faf-slack-invite-automation.env
     restart: always
     ports:
       - "3001:3000"
